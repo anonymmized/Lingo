@@ -1,0 +1,13 @@
+#!/bin/zsh
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+BINARY="$SCRIPT_DIR/lingo"
+
+if [ ! -x "$BINARY" ]; then
+    echo "Не найден исполняемый файл: $BINARY"
+    read "?Нажми Enter, чтобы закрыть окно..."
+    exit 1
+fi
+
+exec "$BINARY"
