@@ -26,10 +26,11 @@ if(APPLE)
         ${CMAKE_BINARY_DIR}/Lingo.command
         @ONLY
     )
-
-    add_custom_target(
-        macos_shortcut ALL
-        COMMAND ${CMAKE_COMMAND} -E chmod +x ${CMAKE_BINARY_DIR}/Lingo.command
-        DEPENDS lingo
+    file(
+        CHMOD ${CMAKE_BINARY_DIR}/Lingo.command
+        PERMISSIONS
+            OWNER_READ OWNER_WRITE OWNER_EXECUTE
+            GROUP_READ GROUP_EXECUTE
+            WORLD_READ WORLD_EXECUTE
     )
 endif()
