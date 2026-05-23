@@ -4,6 +4,7 @@
 #include "levels/LevelManager.hpp"
 #include "progress/ProgressManager.hpp"
 #include "quiz/QuizGame.hpp"
+#include "utils/AppPaths.hpp"
 #include "utils/TerminalUi.hpp"
 
 #include <algorithm>
@@ -13,13 +14,6 @@
 
 namespace
 {
-    constexpr const char* kWordsFile =
-        "assets/words.txt";
-    constexpr const char* kProgressFile =
-        "assets/progress.txt";
-    constexpr const char* kMistakesFile =
-        "assets/mistakes.txt";
-
     int calculateAccuracy(
         int correct,
         int total)
@@ -50,12 +44,14 @@ namespace
 
     bool saveState(
         const ProgressManager& progressManager,
-        const MistakeManager& mistakeManager)
+        const MistakeManager& mistakeManager,
+        const std::string& progressFile,
+        const std::string& mistakesFile)
     {
         return progressManager.save(
-                   kProgressFile) &&
+                   progressFile) &&
                mistakeManager.save(
-                   kMistakesFile);
+                   mistakesFile);
     }
 
     void clampCurrentLevel(
@@ -311,7 +307,9 @@ namespace
         QuizGame& quiz,
         ProgressManager& progressManager,
         MistakeManager& mistakeManager,
-        AchievementManager& achievementManager)
+        AchievementManager& achievementManager,
+        const std::string& progressFile,
+        const std::string& mistakesFile)
     {
         TerminalUi::clearScreen();
 
@@ -347,7 +345,9 @@ namespace
             progressManager.data());
         saveState(
             progressManager,
-            mistakeManager);
+            mistakeManager,
+            progressFile,
+            mistakesFile);
 
         TerminalUi::clearScreen();
         showRoundSummary(result);
@@ -358,7 +358,9 @@ namespace
         QuizGame& quiz,
         ProgressManager& progressManager,
         MistakeManager& mistakeManager,
-        AchievementManager& achievementManager)
+        AchievementManager& achievementManager,
+        const std::string& progressFile,
+        const std::string& mistakesFile)
     {
         const auto words =
             buildMistakeWords(
@@ -397,7 +399,9 @@ namespace
             progressManager.data());
         saveState(
             progressManager,
-            mistakeManager);
+            mistakeManager,
+            progressFile,
+            mistakesFile);
 
         TerminalUi::clearScreen();
         showRoundSummary(result);
@@ -431,12 +435,27 @@ namespace
     }
 }
 
-int main()
+int main(
+    int argc,
+    char* argv[])
 {
+    AppPaths::initialize(
+        argc > 0 ? argv[0] : nullptr);
+
+    const auto wordsFile =
+        AppPaths::resourceFile(
+            "words.txt");
+    const auto progressFile =
+        AppPaths::dataFile(
+            "progress.txt").string();
+    const auto mistakesFile =
+        AppPaths::dataFile(
+            "mistakes.txt").string();
+
     WordDatabase database;
 
     if (!database.loadFromFile(
-            kWordsFile))
+            wordsFile.string()))
     {
         std::cerr
             << TerminalUi::colorize(
@@ -464,14 +483,14 @@ int main()
 
     ProgressManager progressManager;
     progressManager.load(
-        kProgressFile);
+        progressFile);
     clampCurrentLevel(
         progressManager,
         levelManager.levelCount());
 
     MistakeManager mistakeManager;
     mistakeManager.load(
-        kMistakesFile);
+        mistakesFile);
 
     AchievementManager achievementManager;
     achievementManager.initialize();
@@ -512,7 +531,9 @@ int main()
                 quiz,
                 progressManager,
                 mistakeManager,
-                achievementManager);
+                achievementManager,
+                progressFile,
+                mistakesFile);
             continue;
         }
 
@@ -528,7 +549,9 @@ int main()
                 quiz,
                 progressManager,
                 mistakeManager,
-                achievementManager);
+                achievementManager,
+                progressFile,
+                mistakesFile);
             continue;
         }
 
@@ -539,7 +562,9 @@ int main()
                 quiz,
                 progressManager,
                 mistakeManager,
-                achievementManager);
+                achievementManager,
+                progressFile,
+                mistakesFile);
             continue;
         }
 
